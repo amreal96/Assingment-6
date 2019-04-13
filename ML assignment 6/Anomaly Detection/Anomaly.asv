@@ -1,0 +1,101 @@
+clc
+clear all
+close all
+
+Data_Set= readtable('house_prices_data_training_data.csv');
+training_Data = table2array(Data_Set(1:10799,4:21));
+testing_data=table2array(Data_Set(10800:17999,4:21));
+y = round(rand(7200,1));
+Normalized_training_Data=var_Normalise(training_Data);
+Normalized_testing_data=var_Normalise(testing_data);
+
+[m, n] = size(Normalized_training_Data);
+mu = zeros(n, 1);
+
+VarFeature=[];
+for i=1:18
+    for j=1:18
+    Varfeature_training_data(i)=var(Normalized_training_Data(:,j));
+    Varfeature_testing_data(i)=var(Normalized_testing_data(:,j));
+    end
+end
+
+
+
+mu_training_data = 1/m * sum(Normalized_training_Data);
+mu_testing_data = 1/m * sum(Normalized_testing_data);
+
+
+
+for i=1:18
+
+pd_training_data = makedist('Normal','mu',mu_training_data(i),'sigma', Varfeature_training_data(i));
+y_training_data(:,i) = cdf(pd_training_data,Normalized_training_Data(:,i));
+
+pd_testing_data = makedist('Normal','mu',mu_testing_data (i),'sigma',Varfeature_testing_data(i));
+y_testing_data(:,i) = cdf(pd_testing_data,Normalized_testing_data(:,i));
+end
+
+for i=1:10799
+    
+    probabilties_training_data(i,:)=sum(y_training_data(i,:));
+   
+    
+end
+
+for i=1:7200
+  
+    probabilties_testing_data(i,:)=sum(y_testing_data(i,:));
+    
+end
+
+
+%threshold
+min_prob= min( probabilties_training_data);
+max_prob=max( probabilties_training_data);
+
+% min_prob_testing= min( probabilties_testing_data);
+% max_prob_testing=max( probabilties_testing_data);
+
+
+idx_anomaly=[];
+for i=1:7200
+    if probabilties_testing_data(i,:)< min_prob ||  probabilties_testing_data(i,:) > max_prob
+        
+    end
+end
+    
+        
+
+
+
+
+
+
+
+
+
+% GussianPDF=[];
+% for i=1:18
+% GussianPDF(i,:)=normpdf(Normalized_Data(:,i),mu(:,i), Varfeature(:,i));
+% 
+% end
+% Gussian_PDF_Final=transpose(GussianPDF);
+
+
+% Gussian_Cross_validation=multivariateGaussian(Normalized_crossVal,mu,Varfeature);
+% 
+% Gussian_dataSet=multivariateGaussian(Normalized_Data,mu,Varfeature);
+% 
+% 
+% 
+%  [epsilon]=selectThreshold(y,Gussian_Cross_validation);
+%  
+%  
+%  outliers = find(Gussian_dataSet(:,1) < epsilon);
+%  
+
+
+
+
+    
